@@ -4,6 +4,29 @@ from scipy.spatial import Delaunay
 from itertools import permutations
 
 
+class Node:
+    def __init__(self, xpos, ypos):
+        self.xpos = xpos
+        self.ypos = ypos
+        self.coords = [xpos, ypos]
+
+
+class Truss:
+    pass
+
+
+class Graph:
+    pass
+
+
+node_1 = Node(5, 6)
+node_2 = Node(5, 6)
+
+
+print(node_1.xpos)
+
+
+"""
 def triangleify(hingelist):
     triangles = Delaunay(hingelist)
     triangles = triangles.simplices
@@ -52,3 +75,4 @@ for i in range(0, 5):
     add_hinge(random.randint(-10, 10), random.randint(-10, 10))
 triangleify(hingelist)
 main()
+"""
