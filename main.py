@@ -8,6 +8,7 @@ def draw_graph(hingelist, trusslist):
     xpts, ypts = zip(*hingelist)
     # Draw Trusses
     triangles = Delaunay(hingelist)
+    print(triangles.simplices)
     for i in range(0, len(hingelist), 1):
         plt.triplot(xpts, ypts, triangles.simplices.copy(), zorder=1, color="green")
     # Draw Hinges
@@ -30,15 +31,14 @@ def add_truss(pt1, pt2):
 
 
 def main():
-    for i in range(0, 5):
-        add_hinge(random.randint(-10, 10), random.randint(-10, 10))
     draw_graph(hingelist, trusslist)
 
 
 hingelist = []
 trusslist = []
 
+for i in range(0, 5):
+    add_hinge(random.randint(-10, 10), random.randint(-10, 10))
 while True:
     main()
-    hingelist = []
     trusslist = []
