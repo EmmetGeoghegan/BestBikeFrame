@@ -1,11 +1,11 @@
 # Python-TheBestShape
 
 ## To-do List
-* Finish Node Class
-* Finish Truss Class
-* Add truss properties
-* Make truss generator
-* Make Node generator
+<s> * Finish Node Class </s>
+<s> * Finish Truss Class </s>
+<s> * Add truss properties </s>
+<s> * Make truss generator </s>
+<s> * Make Node generator </s>
 * Apply a force
 * Calculate movements
 * Least movement is our fitness function
