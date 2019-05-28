@@ -24,6 +24,7 @@ class Node:
 
 class Truss:
     num_of_truss = 0
+    available_mats =
 
     def __init__(self, start, end):
         self.start = start
@@ -89,9 +90,7 @@ for i in range(0, 5, 1):
 coordlist = []
 for i in Nodelist:
     coordlist.append(Node.coords(i))
-# print(coordlist)
+
 trusslist = triangleify(coordlist)
-# print(trusslist[1].start)
-"""for i in trusslist:
-    print(i.start, i.end)"""
+
 draw_graph(Nodelist, trusslist)
