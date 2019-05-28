@@ -24,12 +24,13 @@ class Node:
 
 class Truss:
     num_of_truss = 0
-    available_mats =
+    available_mats = 0
 
     def __init__(self, start, end):
         self.start = start
         self.end = end
         Truss.num_of_truss += 1
+        Truss.available_mats -= Truss.length(self)
 
     def tslope(self):
         rise = math.abs(Nodelist[self.start].ypos - Nodelist[self.end].ypos)
@@ -42,8 +43,8 @@ class Truss:
         return ang
 
     def length(self):
-        rise = math.abs(Nodelist[self.start].ypos - Nodelist[self.end].ypos)
-        run = math.abs(Nodelist[self.start].xpos - Nodelist[self.end].xpos)
+        rise = abs(Nodelist[self.start].ypos - Nodelist[self.end].ypos)
+        run = abs(Nodelist[self.start].xpos - Nodelist[self.end].xpos)
         dist = math.sqrt(rise**2 + run**2)
         return dist
 
@@ -84,9 +85,16 @@ def draw_graph(nodelist, trusslist):
 
 
 Nodelist = []
-for i in range(0, 5, 1):
-    Nodelist.append(Node(random.randint(1, 10), random.randint(1, 10), random.randint(0, 2)))
-
+# Back Wheel (Stationary Mount)
+Nodelist.append(Node(0, 0, 2))
+# Pedal Mount (Normal Node)
+Nodelist.append(Node(30, 0, 0))
+# Front Wheel (Moving Mount)
+Nodelist.append(Node(70, 45, 1))
+# Mystery Node
+Nodelist.append(Node(20, 35, 0))
+# Available Material
+Truss.available_mats = 300
 coordlist = []
 for i in Nodelist:
     coordlist.append(Node.coords(i))
@@ -94,3 +102,4 @@ for i in Nodelist:
 trusslist = triangleify(coordlist)
 
 draw_graph(Nodelist, trusslist)
+print(Truss.available_mats)
