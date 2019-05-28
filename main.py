@@ -5,26 +5,41 @@ from itertools import permutations
 
 
 class Node:
-    def __init__(self, xpos, ypos):
+    num_of_nodes = 0
+
+    def __init__(self, xpos, ypos, anchor):
         self.xpos = xpos
         self.ypos = ypos
-        self.coords = [xpos, ypos]
+        self.anchor = anchor
+
+        Node.num_of_nodes += 1
+
+    def coords(self):
+        return([self.xpos, self.ypos])
+
+    def applyforce(self, force):
+        self.force = force
 
 
 class Truss:
-    pass
+    def __init__(self, start, end):
+        self.start = start
+        self.end = end
+
+    def tslope(self):
+        pass
+
+    def tangv(self):
+        pass
+
+    def length(self):
+        pass
 
 
-class Graph:
-    pass
+node_1 = Node(5, 6, 0)
+node_2 = Node(5, 9, 0)
 
-
-node_1 = Node(5, 6)
-node_2 = Node(5, 6)
-
-
-print(node_1.xpos)
-
+print(Node.num_of_nodes)
 
 """
 def triangleify(hingelist):
@@ -66,9 +81,9 @@ def draw_graph(hingelist, trusslist):
 def main():
     draw_graph(hingelist, trusslist)
 
+    trusslist = []
 
 hingelist = []
-trusslist = []
 
 
 for i in range(0, 5):
