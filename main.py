@@ -1,7 +1,8 @@
 import matplotlib.pyplot as plt
 import random
 from scipy.spatial import Delaunay
-from itertools import permutations
+from itertools import combinations
+import math as math
 
 
 class Node:
@@ -22,72 +23,75 @@ class Node:
 
 
 class Truss:
+    num_of_truss = 0
+
     def __init__(self, start, end):
         self.start = start
         self.end = end
+        Truss.num_of_truss += 1
 
     def tslope(self):
-        pass
+        rise = math.abs(Nodelist[self.start].ypos - Nodelist[self.end].ypos)
+        run = math.abs(Nodelist[self.start].xpos - Nodelist[self.end].xpos)
+        slope = rise/run
+        return slope
 
     def tangv(self):
-        pass
+        ang = math.degrees(math.atan(tslope(self)))
+        return ang
 
     def length(self):
-        pass
+        rise = math.abs(Nodelist[self.start].ypos - Nodelist[self.end].ypos)
+        run = math.abs(Nodelist[self.start].xpos - Nodelist[self.end].xpos)
+        dist = math.sqrt(rise**2 + run**2)
+        return dist
 
 
-node_1 = Node(5, 6, 0)
-node_2 = Node(5, 9, 0)
-
-print(Node.num_of_nodes)
-
-"""
-def triangleify(hingelist):
-    triangles = Delaunay(hingelist)
+def triangleify(coords):
+    j = []
+    triangles = Delaunay(coords)
     triangles = triangles.simplices
     for row in triangles:
-        perm = permutations(row, 2)
-        for i in perm:
-            add_truss(i[0], i[1])
+        comb = combinations(row, 2)
+        for i in comb:
+            j.append(Truss(i[0], i[1]))
+    return j
 
 
-def add_truss(pt1, pt2):
-    trusslist.append([pt1, pt2])
+def draw_graph(nodelist, trusslist):
+    # Draw Hinges
+    for i in nodelist:
+        if i.anchor is 1:
+            plt.scatter(i.xpos, i.ypos, s=100, color="orange", zorder=2)
+        elif i.anchor is 2:
+            plt.scatter(i.xpos, i.ypos, s=100, color="grey", zorder=2)
+        else:
+            plt.scatter(i.xpos, i.ypos, s=100, color="cyan", zorder=2)
 
-
-def add_hinge(x, y):
-    hingelist.append([x, y])
-
-
-def draw_graph(hingelist, trusslist):
-    # Unzip and get our x and y co-ords
-    xpts, ypts = zip(*hingelist)
     # Draw Trusses
     for i in trusslist:
-        start = i[0]
-        end = i[1]
-        plt.plot([xpts[start], xpts[end]], [ypts[start], ypts[end]], color="blue", linewidth=2, zorder=1)
-    # Draw Hinges
-    plt.scatter(xpts, ypts, s=100, color="blue", zorder=2)
+        plt.plot((nodelist[i.start].xpos, nodelist[i.end].xpos), (nodelist[i.start].ypos,
+                                                                  nodelist[i.end].ypos), color="cyan", linewidth=2, zorder=1)
+    plt.plot(1, 2, 6, 9, color="cyan")
     # Draw Hinge labels
-    for i in range(0, len(hingelist), 1):
-        plt.annotate(i, (hingelist[i][0], hingelist[i][1]), size=20, color="black", zorder=3)
+    for i in range(0, Node.num_of_nodes, 1):
+        plt.annotate(i, (nodelist[i].xpos, nodelist[i].ypos), size=20, color="black", zorder=3)
     plt.title("Our Structure")
     plt.xlabel("x-Coords")
     plt.ylabel("y-Coords")
     plt.show()
 
 
-def main():
-    draw_graph(hingelist, trusslist)
+Nodelist = []
+for i in range(0, 5, 1):
+    Nodelist.append(Node(random.randint(1, 10), random.randint(1, 10), random.randint(0, 2)))
 
-    trusslist = []
-
-hingelist = []
-
-
-for i in range(0, 5):
-    add_hinge(random.randint(-10, 10), random.randint(-10, 10))
-triangleify(hingelist)
-main()
-"""
+coordlist = []
+for i in Nodelist:
+    coordlist.append(Node.coords(i))
+# print(coordlist)
+trusslist = triangleify(coordlist)
+# print(trusslist[1].start)
+"""for i in trusslist:
+    print(i.start, i.end)"""
+draw_graph(Nodelist, trusslist)
