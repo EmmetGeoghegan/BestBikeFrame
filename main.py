@@ -2,11 +2,7 @@ import matplotlib.pyplot as plt
 from scipy.spatial import Delaunay
 from itertools import combinations
 import math as math
-
-import pygame as pg
-import pymunk
-import pymunk.pygame_util
-from pymunk.vec2d import Vec2d
+from anastruct import SystemElements
 
 
 class Node:
@@ -16,7 +12,6 @@ class Node:
         self.xpos = xpos
         self.ypos = ypos
         self.anchor = anchor
-
         Node.num_of_nodes += 1
 
     def coords(self):
@@ -32,14 +27,18 @@ class Truss:
 
     def __init__(self, start, end):
         self.start = start
+        self.startx = Nodelist[self.start].xpos
+        self.starty = Nodelist[self.start].ypos
         self.end = end
+        self.endx = Nodelist[self.end].xpos
+        self.endy = Nodelist[self.end].ypos
+        self.rise = abs(self.starty - self.endy)
+        self.run = abs(self.startx - self.endx)
         Truss.num_of_truss += 1
         Truss.available_mats -= Truss.length(self)
 
     def tslope(self):
-        rise = math.abs(Nodelist[self.start].ypos - Nodelist[self.end].ypos)
-        run = math.abs(Nodelist[self.start].xpos - Nodelist[self.end].xpos)
-        slope = rise/run
+        slope = self.rise/self.run
         return slope
 
     def tangv(self):
@@ -47,61 +46,43 @@ class Truss:
         return ang
 
     def length(self):
-        rise = abs(Nodelist[self.start].ypos - Nodelist[self.end].ypos)
-        run = abs(Nodelist[self.start].xpos - Nodelist[self.end].xpos)
-        dist = math.sqrt(rise**2 + run**2)
+        dist = math.sqrt(self.rise**2 + self.run**2)
         return dist
 
     def midpoint(self):
-        x = (Nodelist[self.start].xpos + Nodelist[self.end].xpos)/2
-        y = (Nodelist[self.start].ypos + Nodelist[self.end].ypos)/2
+        x = (self.startx + self.endx)/2
+        y = (self.starty + self.endy)/2
         return (x, y)
 
 
 def triangleify(coords):
-    j = []
+    bars = []
+    output = []
     triangles = Delaunay(coords)
     triangles = triangles.simplices
     for row in triangles:
         comb = combinations(row, 2)
         for i in comb:
-            j.append(Truss(i[0], i[1]))
-    return j
-
-
-def draw_graph(nodelist, trusslist):
-    # Draw Hinges
-    for i in nodelist:
-        if i.anchor == 1:
-            plt.scatter(i.xpos, i.ypos, s=100, color="orange", zorder=2)
-        elif i.anchor == 2:
-            plt.scatter(i.xpos, i.ypos, s=100, color="grey", zorder=2)
-        else:
-            plt.scatter(i.xpos, i.ypos, s=100, color="cyan", zorder=2)
-
-    # Draw Trusses
-    for i in trusslist:
-        plt.plot((nodelist[i.start].xpos, nodelist[i.end].xpos), (nodelist[i.start].ypos,
-                                                                  nodelist[i.end].ypos), color="cyan", linewidth=2, zorder=1)
-    plt.plot(1, 2, 6, 9, color="cyan")
-    # Draw Hinge labels
-    for i in range(0, Node.num_of_nodes, 1):
-        plt.annotate(i, (nodelist[i].xpos, nodelist[i].ypos), size=20, color="black", zorder=3)
-    plt.title("Our Structure")
-    plt.xlabel("x-Coords")
-    plt.ylabel("y-Coords")
-    plt.show()
+            bars.append(i)
+    for i in bars:
+        duplic = i[::-1]
+        for j in bars:
+            if duplic == j:
+                bars.remove(j)
+    for i in bars:
+        output.append(Truss(i[0], i[1]))
+    return output
 
 
 Nodelist = []
 # Back Wheel (Stationary Mount)
-Nodelist.append(Node(0, 0, 2))
+Nodelist.append(Node(0, 0, 1))
+# Front Wheel (Moving Mount)
+Nodelist.append(Node(70, 45, 2))
 # Pedal Mount (Normal Node)
 Nodelist.append(Node(30, 0, 0))
-# Front Wheel (Moving Mount)
-Nodelist.append(Node(70, 45, 1))
-# Mystery Node
-Nodelist.append(Node(20, 35, 0))
+# Force Node
+Nodelist.append(Node(20, 35, 3))
 # Available Material
 Truss.available_mats = 300
 coordlist = []
@@ -110,75 +91,52 @@ for i in Nodelist:
 
 trusslist = triangleify(coordlist)
 
-#draw_graph(Nodelist, trusslist)
-# print(Truss.available_mats)
 ###########################################################################################################################################
 
-
-def offsety(val):
-    newcoord = 875-(val*10)
-    return newcoord
+ss = SystemElements()
 
 
-def offsetx(val):
-    newcoord = (val*10)+25
-    return newcoord
+def getnodeid(node):
+    id = ss.find_node_id(node.coords())
+    return(id)
 
 
-"""def drawtruss(canvas, color, trusslist):
+def addobj(trusslist, Nodelist):
     for i in trusslist:
-        start = (offsetx(Nodelist[i.start].xpos), offsety(Nodelist[i.start].ypos))
-        end = (offsetx(Nodelist[i.end].xpos), offsety(Nodelist[i.end].ypos))
-        pg.draw.line(canvas, color, start, end, 20)
+        ss.add_truss_element(location=[[i.startx, i.starty], [i.endx, i.endy]], EA=8*(10**11))
+
+    for i in range(0, len(Nodelist), 1):
+        if Nodelist[i].anchor == 1:
+            ss.add_support_fixed(node_id=getnodeid(Nodelist[i]))
+        elif Nodelist[i].anchor == 2:
+            ss.add_support_roll(node_id=getnodeid(Nodelist[i]), direction=1)
 
 
-def drawnode(canvas, nodelist):
-    for i in nodelist:
-        position = (offsetx(i.xpos), offsety(i.ypos))
-        if i.anchor == 1:
-            pg.draw.circle(canvas, movenodecolor, position, 20, 0)
-        elif i.anchor == 2:
-            pg.draw.circle(canvas, fixednodecolor, position, 20, 0)
-        else:
-            pg.draw.circle(canvas, nodecolor, position, 20, 0)"""
+def nodeforce(Nodelist, force):
+    for i in range(0, len(Nodelist), 1):
+        if Nodelist[i].anchor == 3:
+            Nodelist[i].applyforce(force*-1)
+            ss.point_load(node_id=getnodeid(Nodelist[i]), Fx=0, Fy=Nodelist[i].force, rotation=0)
 
 
-def whiteout(canvas, color):
-    canvas.fill(color)
+def stiffness(force, nodelist):
+    for i in range(0, len(nodelist), 1):
+        if nodelist[i].anchor == 3:
+            newpos = ss.get_node_displacements(node_id=getnodeid(nodelist[i]))
+            delx = newpos["ux"]
+            dely = newpos["uy"]
+            dist = math.sqrt(delx**2 + dely**2)
+            print("dist", dist)
+            # return(force/dist)
+            return(dist)
 
 
-def add_bar(space, pos):
-    body = pymunk.Body()
-    body.position = Vec2d(pos)
-    shape = pymunk.Segment(body, (0, 40), (0, -40), 6)
-    shape.mass = 2
-    shape.friction = 0.7
-    space.add(body, shape)
-    return body
+addobj(trusslist, Nodelist)
+force = 10000000000
+nodeforce(Nodelist, force)
+ss.solve(max_iter=500)
+
+print(stiffness(force, Nodelist), "is the stiffness for the current sys")
 
 
-white = (255, 255, 255)
-trusscolor = (0, 0, 0)
-nodecolor = (255, 255, 0)
-fixednodecolor = (96, 96, 96)
-movenodecolor = (255, 128, 0)
-
-pymunk.pygame_util.positive_y_is_up = False
-pygame.init()
-space.gravity = (0.0, 900.0)
-b1 = add_bar(space, (50, 80))
-
-
-canvas = pg.display.set_mode((900, 900))
-clock = pg.time.Clock()
-pg.display.set_caption("Bicycle")
-whiteout(canvas, white)
-running = True
-
-while running:
-    for event in pg.event.get():
-        if event.type == pg.QUIT:
-            running = False
-"""    drawtruss(canvas, trusscolor, trusslist)
-    drawnode(canvas, Nodelist)"""
-pg.display.update()
+ss.show_displacement(factor=50)
