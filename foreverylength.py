@@ -163,7 +163,7 @@ def definecoordlist(nodelist):
 ############################
 # Node Location Generation #
 ############################
-allowed_length = int(input("Please enter allowed length: "))
+
 xa = 0
 ya = 0
 xb = 30
@@ -211,25 +211,51 @@ def gendistpts(Tolerance, allowed_length):
         return(valid_locations)
 
 
-valid_loc = gendistpts(Tolerance, allowed_length)
+allbarx = []
+allbary = []
+allbarz = []
+for pp in range(94, 194):
+    allowed_length = pp
+    valid_loc = gendistpts(0.99, allowed_length)
 
-system("cls")
-print("Done!")
+    system("cls")
+    print("Done!")
 
-###################
-# Node Generation #
-###################
-sval = []
-poscoordsx = []
-poscoordsy = []
-bestcoords = []
-currentsmallest = 100
-system("cls")
-print("Starting Simulation.....")
-for i in valid_loc:
+    ###################
+    # Node Generation #
+    ###################
+    sval = []
+    poscoordsx = []
+    poscoordsy = []
+    bestcoords = []
+    currentsmallest = 100
+    system("cls")
+    print("Starting Simulation.....", str(pp-93)+"/100")
+    for i in valid_loc:
+        ss = SystemElements()
+        Nodelist = []
+        Nodelist = definenodelist(i[0], i[1], Nodelist)
+
+        coordlist = []
+        coordlist = definecoordlist(Nodelist)
+
+        trusslist = []
+        trusslist = triangleify(coordlist)
+        force = 10000000000
+        addobj(trusslist, Nodelist)
+        nodeforce(Nodelist, force)
+        ss.solve(max_iter=5)
+        stiff = stiffness(force, Nodelist)
+        if stiff < currentsmallest:
+            currentsmallest = stiff
+            bestcoords = i
+        sval.append(stiffness(force, Nodelist))
+        poscoordsx.append(i[0])
+        poscoordsy.append(i[1])
+
     ss = SystemElements()
     Nodelist = []
-    Nodelist = definenodelist(i[0], i[1], Nodelist)
+    Nodelist = definenodelist(bestcoords[0], bestcoords[1], Nodelist)
 
     coordlist = []
     coordlist = definecoordlist(Nodelist)
@@ -239,50 +265,32 @@ for i in valid_loc:
     force = 10000000000
     addobj(trusslist, Nodelist)
     nodeforce(Nodelist, force)
-    ss.solve(max_iter=5)
-    stiff = stiffness(force, Nodelist)
-    if stiff < currentsmallest:
-        currentsmallest = stiff
-        bestcoords = i
-    sval.append(stiffness(force, Nodelist))
-    poscoordsx.append(i[0])
-    poscoordsy.append(i[1])
+    ss.solve(max_iter=50)
+    ss.show_structure()
 
-system("cls")
-print("Done Simulation")
-print("Stiffness of the structure: ", currentsmallest)
-print("Best Co-Ordinates for length of {}:".format(allowed_length), bestcoords)
-
-################################
-# Graphical Physics Simulation #
-################################
-ss = SystemElements()
-Nodelist = []
-Nodelist = definenodelist(bestcoords[0], bestcoords[1], Nodelist)
-
-coordlist = []
-coordlist = definecoordlist(Nodelist)
-
-trusslist = []
-trusslist = triangleify(coordlist)
-force = 10000000000
-addobj(trusslist, Nodelist)
-nodeforce(Nodelist, force)
-ss.solve(max_iter=50)
-ss.show_structure()
+    system("cls")
+    print("Done Simulation")
+    print("Stiffness of the structure: ", currentsmallest)
+    print("Best Co-Ordinates for length of {}:".format(allowed_length), bestcoords)
+    allbarx.append(bestcoords[0])
+    allbary.append(bestcoords[1])
+    allbarz.append(currentsmallest)
 
 ###########################
 # Plot Values Graphically #
 ###########################
 
 fig = plt.figure()
+X = allbarx
+Y = allbary
+plt.plot(X, Y)
+plt.show()
+
+fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 X = poscoordsx
 Y = poscoordsy
 Z = sval
-print(X)
-print(Y)
-print(Z)
 ax.plot_trisurf(X, Y, Z, cmap="jet")
 plt.show()
 

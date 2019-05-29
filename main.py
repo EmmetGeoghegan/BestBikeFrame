@@ -225,7 +225,7 @@ Y = poscoordsy
 Z = sval
 ax.plot_trisurf(X, Y, Z, cmap="jet")
 plt.show()
-print(Truss.available_mats)
+
 
 ########################
 # Plot Values With GPU #
