@@ -1,4 +1,3 @@
-import sys
 from vispy import app, scene
 import numpy as np
 

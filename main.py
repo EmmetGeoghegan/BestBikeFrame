@@ -4,6 +4,7 @@ from scipy.spatial import Delaunay
 from itertools import combinations
 import math as math
 from anastruct import SystemElements
+from os import system
 # import plotwithgpu as gpuplot # Un-Comment if you have an Nvida GPU
 # 2 Classes, 7 Functions and
 
@@ -189,9 +190,12 @@ for i in range(20, 40, 1):
         sval.append(stiffness(force, Nodelist))
         poscoordsx.append(i)
         poscoordsy.append(j)
-    print("prog:  ", str(i/30)+"%")
-
-print(currentsmallest, bestcoords)
+    system("cls")
+    print("Progress:  ", str(int(((i-20)/19)*100))+"%")
+system("cls")
+print("Done")
+print("Stiffness of the structure: ", currentsmallest)
+print("Co-Ordinates:", bestcoords)
 
 ################################
 # Graphical Physics Simulation #
