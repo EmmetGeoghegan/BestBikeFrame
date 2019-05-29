@@ -170,7 +170,7 @@ xb = 30
 yb = 0
 xc = 70
 yc = 45
-Tolerance = 0.999
+Tolerance = 0.9999
 
 
 def ptdist(x1, y1, x2, y2):
@@ -198,7 +198,9 @@ def gendistpts(Tolerance, allowed_length):
         if allowed_length >= totaldist >= Tolerance*allowed_length:
             valid_locations.append(i)
     if not valid_locations:
-        system("cls")
+        print("No solns exist for given length")
+        exit()
+        """system("cls")
         print("Failed, Retrying with Tolerance of {}".format(Tolerance))
         Tolerance -= 0.01
         if Tolerance < 0.6 or allowed_length < 94:
@@ -206,16 +208,18 @@ def gendistpts(Tolerance, allowed_length):
             print("No solns exist for given length")
             exit()
         else:
-            gendistpts(Tolerance, allowed_length)
-    else:
-        print(valid_locations, "jjj", Tolerance)
-        input("inside")
-        return(valid_locations)
+            valid_locations = []
+            pos_locations = []
+            gendistpts(Tolerance, allowed_length)"""
+
+    print(valid_locations, "jjj", Tolerance)
+    input("inside")
+    return(valid_locations)
 
 
 valid_loc = []
 valid_loc = gendistpts(Tolerance, allowed_length)
-print(gendistpts(Tolerance, allowed_length))
+print(valid_loc)
 input("outside")
 
 system("cls")

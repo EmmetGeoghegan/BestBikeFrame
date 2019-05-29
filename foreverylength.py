@@ -214,9 +214,9 @@ def gendistpts(Tolerance, allowed_length):
 allbarx = []
 allbary = []
 allbarz = []
-for pp in range(148, 152):
+for pp in range(100, 155):
     allowed_length = pp
-    valid_loc = gendistpts(0.999, allowed_length)
+    valid_loc = gendistpts(0.9981, allowed_length)
     system("cls")
     print("Done!")
 
@@ -229,7 +229,7 @@ for pp in range(148, 152):
     bestcoords = []
     currentsmallest = 100
     system("cls")
-    print("Starting Simulation.....", str(pp-140)+"/20")
+    print("Starting Simulation.....", str(pp-100)+"/54")
     for i in valid_loc:
         ss = SystemElements()
         Nodelist = []
