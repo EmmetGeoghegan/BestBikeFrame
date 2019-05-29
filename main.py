@@ -1,8 +1,11 @@
+from mpl_toolkits.mplot3d import axes3d
+import time
 import matplotlib.pyplot as plt
 from scipy.spatial import Delaunay
 from itertools import combinations
 import math as math
 from anastruct import SystemElements
+import numpy as np
 
 
 class Node:
@@ -54,6 +57,8 @@ class Truss:
         y = (self.starty + self.endy)/2
         return (x, y)
 
+############################################################################################################################
+
 
 def triangleify(coords):
     bars = []
@@ -74,26 +79,7 @@ def triangleify(coords):
     return output
 
 
-Nodelist = []
-# Back Wheel (Stationary Mount)
-Nodelist.append(Node(0, 0, 1))
-# Front Wheel (Moving Mount)
-Nodelist.append(Node(70, 45, 2))
-# Pedal Mount (Normal Node)
-Nodelist.append(Node(30, 0, 0))
-# Force Node
-Nodelist.append(Node(20, 35, 3))
-# Available Material
-Truss.available_mats = 300
-coordlist = []
-for i in Nodelist:
-    coordlist.append(Node.coords(i))
-
-trusslist = triangleify(coordlist)
-
 ###########################################################################################################################################
-
-ss = SystemElements()
 
 
 def getnodeid(node):
@@ -126,17 +112,130 @@ def stiffness(force, nodelist):
             delx = newpos["ux"]
             dely = newpos["uy"]
             dist = math.sqrt(delx**2 + dely**2)
-            print("dist", dist)
             # return(force/dist)
             return(dist)
 
+##############################################################################################################
 
-addobj(trusslist, Nodelist)
+
+def definenodelist(x, y, nodelist):
+    ss = SystemElements()
+    nodelist = []
+    # Back Wheel (Stationary Mount)
+    nodelist.append(Node(0, 0, 1))
+    # Front Wheel (Moving Mount)
+    nodelist.append(Node(70, 45, 2))
+    # Pedal Mount (Normal Node)
+    nodelist.append(Node(30, 0, 0))
+    # Force Node
+    nodelist.append(Node(x, y, 3))
+    # Available Material
+    Truss.available_mats = 300
+    return nodelist
+
+
+def definecoordlist(nodelist):
+    for i in Nodelist:
+        coordlist.append(Node.coords(i))
+    return(coordlist)
+
+
+ss = SystemElements()
+
+sval = []
+poscoordsx = []
+poscoordsy = []
+bestcoords = []
+currentsmallest = 100
+for i in range(20, 40, 1):
+    for j in range(1, 100, 1):
+        ss = SystemElements()
+        Nodelist = []
+        Nodelist = definenodelist(i, j, Nodelist)
+
+        coordlist = []
+        coordlist = definecoordlist(Nodelist)
+
+        trusslist = []
+        trusslist = triangleify(coordlist)
+        force = 10000000000
+        addobj(trusslist, Nodelist)
+        nodeforce(Nodelist, force)
+        ss.solve(max_iter=5)
+        stiff = stiffness(force, Nodelist)
+        if stiff < currentsmallest:
+            currentsmallest = stiff
+            bestcoords = [i, j]
+        sval.append(stiffness(force, Nodelist))
+        poscoordsx.append(i)
+        poscoordsy.append(j)
+    print("prog:  ", str(i/30)+"%")
+
+print(currentsmallest, bestcoords)
+
+ss = SystemElements()
+Nodelist = []
+Nodelist = definenodelist(bestcoords[0], bestcoords[1], Nodelist)
+
+coordlist = []
+coordlist = definecoordlist(Nodelist)
+
+trusslist = []
+trusslist = triangleify(coordlist)
 force = 10000000000
+addobj(trusslist, Nodelist)
 nodeforce(Nodelist, force)
-ss.solve(max_iter=500)
+ss.solve(max_iter=5)
+stiff = stiffness(force, Nodelist)
+if stiff < currentsmallest:
+    currentsmallest = stiff
+    bestcoords = (i, j)
+sval.append(stiffness(force, Nodelist))
+poscoordsx.append(i)
+poscoordsy.append(j)
 
-print(stiffness(force, Nodelist), "is the stiffness for the current sys")
+ss.show_structure()
 
 
-ss.show_displacement(factor=50)
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+
+# load some test data for demonstration and plot a wireframe
+# Make data.
+X = poscoordsx
+Y = poscoordsy
+Z = sval
+ax.plot_trisurf(X, Y, Z)
+
+# rotate the axes and update
+for angle in range(0, 360):
+    ax.view_init(30, angle)
+    plt.show()
+    plt.pause(.001)
+
+"""from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
+
+import matplotlib.pyplot as plt
+from matplotlib import cm
+from matplotlib.ticker import LinearLocator, FormatStrFormatter
+
+
+
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+
+# Make data.
+X = poscoordsx
+Y = poscoordsy
+Z = sval
+print(X)
+print(Y)
+print(Z)
+# Plot the surface.
+ax.plot_trisurf(X, Y, Z)
+
+for angle in range(0, 360):
+    ax.view_init(30, angle)
+    plt.draw()
+    plt.pause(.001)
+"""
