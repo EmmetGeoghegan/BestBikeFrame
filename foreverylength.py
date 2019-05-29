@@ -214,10 +214,9 @@ def gendistpts(Tolerance, allowed_length):
 allbarx = []
 allbary = []
 allbarz = []
-for pp in range(94, 194):
+for pp in range(148, 152):
     allowed_length = pp
-    valid_loc = gendistpts(0.99, allowed_length)
-
+    valid_loc = gendistpts(0.999, allowed_length)
     system("cls")
     print("Done!")
 
@@ -230,7 +229,7 @@ for pp in range(94, 194):
     bestcoords = []
     currentsmallest = 100
     system("cls")
-    print("Starting Simulation.....", str(pp-93)+"/100")
+    print("Starting Simulation.....", str(pp-140)+"/20")
     for i in valid_loc:
         ss = SystemElements()
         Nodelist = []
@@ -249,32 +248,9 @@ for pp in range(94, 194):
         if stiff < currentsmallest:
             currentsmallest = stiff
             bestcoords = i
-        sval.append(stiffness(force, Nodelist))
-        poscoordsx.append(i[0])
-        poscoordsy.append(i[1])
-
-    ss = SystemElements()
-    Nodelist = []
-    Nodelist = definenodelist(bestcoords[0], bestcoords[1], Nodelist)
-
-    coordlist = []
-    coordlist = definecoordlist(Nodelist)
-
-    trusslist = []
-    trusslist = triangleify(coordlist)
-    force = 10000000000
-    addobj(trusslist, Nodelist)
-    nodeforce(Nodelist, force)
-    ss.solve(max_iter=50)
-    ss.show_structure()
-
-    system("cls")
-    print("Done Simulation")
-    print("Stiffness of the structure: ", currentsmallest)
-    print("Best Co-Ordinates for length of {}:".format(allowed_length), bestcoords)
+    sval.append(stiffness(force, Nodelist))
     allbarx.append(bestcoords[0])
     allbary.append(bestcoords[1])
-    allbarz.append(currentsmallest)
 
 ###########################
 # Plot Values Graphically #
@@ -282,8 +258,10 @@ for pp in range(94, 194):
 
 fig = plt.figure()
 X = allbarx
+print(X)
 Y = allbary
-plt.plot(X, Y)
+print(Y)
+plt.plot(X, Y, '-o')
 plt.show()
 
 fig = plt.figure()

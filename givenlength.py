@@ -208,10 +208,15 @@ def gendistpts(Tolerance, allowed_length):
         else:
             gendistpts(Tolerance, allowed_length)
     else:
+        print(valid_locations, "jjj", Tolerance)
+        input("inside")
         return(valid_locations)
 
 
+valid_loc = []
 valid_loc = gendistpts(Tolerance, allowed_length)
+print(gendistpts(Tolerance, allowed_length))
+input("outside")
 
 system("cls")
 print("Done!")
@@ -275,7 +280,7 @@ ss.show_structure()
 # Plot Values Graphically #
 ###########################
 
-fig = plt.figure()
+"""fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 X = poscoordsx
 Y = poscoordsy
@@ -284,7 +289,7 @@ print(X)
 print(Y)
 print(Z)
 ax.plot_trisurf(X, Y, Z, cmap="jet")
-plt.show()
+plt.show()"""
 
 
 ########################
