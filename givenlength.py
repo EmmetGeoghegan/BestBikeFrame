@@ -170,7 +170,6 @@ xb = 30
 yb = 0
 xc = 70
 yc = 45
-Tolerance = 0.9999
 
 
 def ptdist(x1, y1, x2, y2):
@@ -178,7 +177,8 @@ def ptdist(x1, y1, x2, y2):
     return(out)
 
 
-def gendistpts(Tolerance, allowed_length):
+def gendistpts(allowed_length):
+    global Tolerance
     valid_locations = []
     pos_locations = []
     system("cls")
@@ -199,26 +199,27 @@ def gendistpts(Tolerance, allowed_length):
             valid_locations.append(i)
     if not valid_locations:
         print("No solns exist for given length")
-        exit()
-        """system("cls")
+        # exit()
+        system("cls")
         print("Failed, Retrying with Tolerance of {}".format(Tolerance))
         Tolerance -= 0.01
-        if Tolerance < 0.6 or allowed_length < 94:
+        if Tolerance < 0.9:
             system("cls")
             print("No solns exist for given length")
             exit()
         else:
             valid_locations = []
             pos_locations = []
-            gendistpts(Tolerance, allowed_length)"""
+            return gendistpts(allowed_length)
 
     print(valid_locations, "jjj", Tolerance)
     input("inside")
     return(valid_locations)
 
 
+Tolerance = 0.999
 valid_loc = []
-valid_loc = gendistpts(Tolerance, allowed_length)
+valid_loc = gendistpts(allowed_length)
 print(valid_loc)
 input("outside")
 
@@ -279,6 +280,7 @@ addobj(trusslist, Nodelist)
 nodeforce(Nodelist, force)
 ss.solve(max_iter=50)
 ss.show_structure()
+ss.show_displacement(factor=2)
 
 ###########################
 # Plot Values Graphically #
