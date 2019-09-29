@@ -1,5 +1,8 @@
 # Python-TheBestShape
-
+Code to find the best shape for a bikeframe using given materials <br>
+Created as part of the stokes modelling workshop in NUIG <br>
+Awarded first place <br>
+<br>
 ## To-do List
 <s> Finish Node Class </s></br>
 <s> Finish Truss Class </s></br>
