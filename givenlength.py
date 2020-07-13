@@ -5,15 +5,11 @@ from itertools import combinations
 import math as math
 from anastruct import SystemElements
 from os import system
-# import plotwithgpu as gpuplot # Un-Comment if you have an Nvida GPU
-# 2 Classes, 7 Functions and
 
-###########
-# Classes #
-###########
+# Structure joints
 
 
-class Node:        # Class to create our nodes and give them properties
+class Node:
     num_of_nodes = 0
 
     def __init__(self, xpos, ypos, anchor):
@@ -31,7 +27,8 @@ class Node:        # Class to create our nodes and give them properties
         self.force = force
 
 
-class Truss:     # Class that creates Trusses and gives them properites
+# Structure Trusses
+class Truss:
     num_of_truss = 0
     available_mats = 0
 
@@ -68,14 +65,13 @@ class Truss:     # Class that creates Trusses and gives them properites
         y = (self.starty + self.endy)/2
         return (x, y)
 
+
 ####################
 # Truss Generation #
 ####################
-
-# This function creates our Truss start and end points by
+# Creates our Truss start and end points by
 # Forming Delaunay triangles. The start and end points for each edge
 # Are passed to the Truss class to generate our objects
-
 
 def triangleify(coords):
     bars = []
@@ -95,18 +91,17 @@ def triangleify(coords):
         output.append(Truss(i[0], i[1]))
     return output
 
+
 ########################
 # Structure Simulation #
 ########################
-
-
-# Function gets the anastruct node ID's of a given node in the model
+# Gets the anastruct node ID's of a given node in the model
 def getnodeid(node):
     id = ss.find_node_id(node.coords())
     return(id)
 
 
-# Function to add Trusses and the fixed and rolling supports to the model
+# Add Trusses and the fixed and rolling supports to the model
 def addobj(trusslist, Nodelist):
     for i in trusslist:
         ss.add_truss_element(location=[[i.startx, i.starty], [i.endx, i.endy]], EA=8*(10**11))
@@ -118,7 +113,7 @@ def addobj(trusslist, Nodelist):
             ss.add_support_roll(node_id=getnodeid(Nodelist[i]), direction=1)
 
 
-# Function to add a force to the force node (anchor type 3)
+# Add a force to the force node (anchor type 3)
 def nodeforce(Nodelist, force):
     for i in range(0, len(Nodelist), 1):
         if Nodelist[i].anchor == 3:
@@ -137,7 +132,7 @@ def stiffness(force, nodelist):
             return(dist)
 
 
-# Function that defines our nodes. Takes paramaters to place the force node (x,y)
+# Define our nodes. Takes paramaters to place the force node (x, y)
 def definenodelist(x, y, nodelist):
     nodelist = []
     # Back Wheel (Stationary Mount)
@@ -153,11 +148,43 @@ def definenodelist(x, y, nodelist):
     return nodelist
 
 
-# Function that preps the list of all node co-ordinates to be turned into truss start and end points
+# preps the list of all node co-ordinates to be turned into truss start and end points
 def definecoordlist(nodelist):
     for i in Nodelist:
         coordlist.append(Node.coords(i))
     return(coordlist)
+
+
+def ptdist(x1, y1, x2, y2):
+    out = math.sqrt((x1 - x2)**2 + (y1 - y2)**2)
+    return(out)
+
+
+def gendistpts(Tolerance, allowed_length):
+    valid_locations = []
+    pos_locations = []
+    print("Starting Generation.....")
+    for i in range(0, 30):
+        for j in range(0, 100):
+            pos_locations.append([i, j])
+    print("Validating.....")
+    for i in pos_locations:
+        distpa = ptdist(i[0], i[1], xa, ya)
+        distpb = ptdist(i[0], i[1], xb, yb)
+        distpc = ptdist(i[0], i[1], xc, yc)
+        totaldist = distpa + distpb + distpc
+        if allowed_length >= totaldist >= Tolerance*allowed_length:
+            valid_locations.append(i)
+    if not valid_locations:
+        print("Failed, Retrying with Tolerance of {}".format(round(Tolerance, 2)))
+        Tolerance -= 0.01
+        if Tolerance < 0.6 or allowed_length < 94:
+            print("No solns exist for given length")
+            exit()
+        else:
+            gendistpts(Tolerance, allowed_length)
+    else:
+        return(valid_locations)
 
 
 ############################
@@ -173,47 +200,8 @@ yc = 45
 Tolerance = 0.999
 
 
-def ptdist(x1, y1, x2, y2):
-    out = math.sqrt((x1 - x2)**2 + (y1 - y2)**2)
-    return(out)
-
-
-def gendistpts(Tolerance, allowed_length):
-    valid_locations = []
-    pos_locations = []
-    system("cls")
-    print("Starting Generation.....")
-    for i in range(0, 30, 1):
-        for j in range(1, 100, 1):
-            pos_locations.append([i, j])
-        system("cls")
-        print("Progress:  ", str(int((i/29)*100))+"%")
-    system("cls")
-    print("Validating.....")
-    for i in pos_locations:
-        distpa = ptdist(i[0], i[1], xa, ya)
-        distpb = ptdist(i[0], i[1], xb, yb)
-        distpc = ptdist(i[0], i[1], xc, yc)
-        totaldist = distpa + distpb + distpc
-        if allowed_length >= totaldist >= Tolerance*allowed_length:
-            valid_locations.append(i)
-    if not valid_locations:
-        system("cls")
-        print("Failed, Retrying with Tolerance of {}".format(Tolerance))
-        Tolerance -= 0.01
-        if Tolerance < 0.6 or allowed_length < 94:
-            system("cls")
-            print("No solns exist for given length")
-            exit()
-        else:
-            gendistpts(Tolerance, allowed_length)
-    else:
-        return(valid_locations)
-
-
 valid_loc = gendistpts(Tolerance, allowed_length)
 
-system("cls")
 print("Done!")
 
 ###################
@@ -224,7 +212,6 @@ poscoordsx = []
 poscoordsy = []
 bestcoords = []
 currentsmallest = 100
-system("cls")
 print("Starting Simulation.....")
 for i in valid_loc:
     ss = SystemElements()
@@ -248,7 +235,6 @@ for i in valid_loc:
     poscoordsx.append(i[0])
     poscoordsy.append(i[1])
 
-system("cls")
 print("Done Simulation")
 print("Stiffness of the structure: ", currentsmallest)
 print("Best Co-Ordinates for length of {}:".format(allowed_length), bestcoords)
@@ -285,9 +271,3 @@ print(Y)
 print(Z)
 ax.plot_trisurf(X, Y, Z, cmap="jet")
 plt.show()
-
-
-########################
-# Plot Values With GPU #
-########################
-# gpuplot.plsplotgpu(Z)

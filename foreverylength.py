@@ -5,12 +5,6 @@ from itertools import combinations
 import math as math
 from anastruct import SystemElements
 from os import system
-# import plotwithgpu as gpuplot # Un-Comment if you have an Nvida GPU
-# 2 Classes, 7 Functions and
-
-###########
-# Classes #
-###########
 
 
 class Node:        # Class to create our nodes and give them properties
@@ -293,9 +287,3 @@ Y = poscoordsy
 Z = sval
 ax.plot_trisurf(X, Y, Z, cmap="jet")
 plt.show()
-
-
-########################
-# Plot Values With GPU #
-########################
-# gpuplot.plsplotgpu(Z)

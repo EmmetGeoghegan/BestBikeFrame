@@ -1,3 +1,4 @@
+import plotwithgpu as gpuplot
 from mpl_toolkits.mplot3d import axes3d
 import matplotlib.pyplot as plt
 from scipy.spatial import Delaunay
@@ -5,12 +6,8 @@ from itertools import combinations
 import math as math
 from anastruct import SystemElements
 from os import system
-# import plotwithgpu as gpuplot # Un-Comment if you have an Nvida GPU
-# 2 Classes, 7 Functions and
-
-###########
-# Classes #
-###########
+import plotwithgpu as gpuplot  # GPU accelerated rendering Comment if you dont have an Nvida GPU
+from tqdm import tqdm
 
 
 class Node:        # Class to create our nodes and give them properties
@@ -168,7 +165,10 @@ poscoordsx = []
 poscoordsy = []
 bestcoords = []
 currentsmallest = 100
-for i in range(20, 40, 1):
+# for i in range(20, 40, 1):
+#     for j in range(1, 100, 1):
+
+for i in tqdm(range(20, 40, 1)):
     for j in range(1, 100, 1):
         ss = SystemElements()
         Nodelist = []
@@ -190,9 +190,7 @@ for i in range(20, 40, 1):
         sval.append(stiffness(force, Nodelist))
         poscoordsx.append(i)
         poscoordsy.append(j)
-    system("cls")
-    print("Progress:  ", str(int(((i-20)/19)*100))+"%")
-system("cls")
+    # print("Progress:  ", str(int(((i-20)/19)*100))+"%")
 print("Done")
 print("Stiffness of the structure: ", currentsmallest)
 print("Co-Ordinates:", bestcoords)
@@ -230,4 +228,4 @@ plt.show()
 ########################
 # Plot Values With GPU #
 ########################
-# gpuplot.plsplotgpu(Z)
+gpuplot.plsplotgpu(Z)

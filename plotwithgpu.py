@@ -25,7 +25,3 @@ def plsplotgpu(Z):
 
     canvas.show()
     app.run()
-
-
-def testfunc():
-    print("Hello")
